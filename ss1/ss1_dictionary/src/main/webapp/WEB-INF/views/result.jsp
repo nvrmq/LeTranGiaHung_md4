@@ -1,20 +1,19 @@
 <%--
   Created by IntelliJ IDEA.
   User: macbook
-  Date: 23/5/25
-  Time: 17:00
+  Date: 26/5/25
+  Time: 15:39
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Conversion result</title>
+    <title>${word} to Vietnamese</title>
 </head>
 <body>
-<h2>Conversion result</h2>
-<p>USD amount: ${usd}</p>
-<p>Exchange rate: ${rate}</p>
-<h1>VND amount: ${vnd}</h1>
-<a href="/">Convert another amount of money</a>
+<h2>Translation result for "${word}"</h2>
+<p>Vietnamese word: <strong>${result}</strong></p>
+<br/>
+<a href="/">Translate another word</a>
 </body>
 </html>

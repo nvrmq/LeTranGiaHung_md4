@@ -9,7 +9,7 @@
 <form action="/conversion" method="post">
     <label>Exchange rate from USD to VND</label>
     <input name="rate" type="number" step="0.001" required>
-    <label>USD amount</label>
+    <label>USD amount: </label>
     <input name="usd" type="number" step="0.001" required>
     <input type="submit" value="Convert">
 </form>
