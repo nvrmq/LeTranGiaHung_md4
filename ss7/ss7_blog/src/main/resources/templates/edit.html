@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Modify blog</h1>
+<form th:action="@{/blog/edit}" th:object="${blog}" method="post">
+    <input type="hidden" th:field="*{id}">
+    <div>
+        <label>Title:</label>
+        <input type="text" th:field="*{title}" required>
+    </div>
+    <div>
+        <label>Content:</label>
+        <textarea th:field="*{content}" rows="6" required></textarea>
+    </div>
+    <button type="submit">Cập nhật</button>
+    <a th:href="@{/blog}">Quay lại</a>
+</form>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2 th:text="${blog.title}">Title:</h2>
+<p><strong>Time posted</strong><span th:text="${#temporals.format(blog.createdTime, 'dd/MM/yyyy HH:mm')}"></span></p>
+</br>
+<p th:text="${blog.content}">Content:</p>
+<a th:href="@{/blog}">Return to list</a>
+</body>
+</html>
