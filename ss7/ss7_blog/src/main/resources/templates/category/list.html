@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>List of categories</h1>
+
+<a th:href="@{/categories/create}">New category</a>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Action</th>
+  </tr>
+  <tr th:each="category : ${categories}">
+    <td th:text="${category.id}"></td>
+    <td th:text="${category.name}"></td>
+    <td>
+      <a th:href="@{/categories/edit/{id}(id=${category.id})}">Edit</a>
+      <a th:href="@{/categories/delete/{id}(id=${category.id})}"
+         onclick="return confirm('Are you sure?')">Delete</a>
+    </td>
+  </tr>
+</table>
+
+<a th:href="@{/blog}">Return to blogs</a>
+</body>
+</html>

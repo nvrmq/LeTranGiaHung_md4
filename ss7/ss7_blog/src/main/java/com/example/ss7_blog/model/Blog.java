@@ -18,14 +18,19 @@ public class Blog {
     @Column(columnDefinition = "VARCHAR(50)")
     private LocalDateTime createdTime;
 
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     public Blog() {
         this.createdTime = LocalDateTime.now();
     }
 
-    public Blog(String title, String content) {
+    public Blog(String title, String content, Category category) {
         this.title = title;
         this.content = content;
         this.createdTime = LocalDateTime.now();
+        this.category = category;
     }
 
     public Long getId() {
@@ -58,5 +63,11 @@ public class Blog {
 
     public void setCreatedTime(LocalDateTime createdTime) {
         this.createdTime = createdTime;
+    }
+    public Category getCategory() {
+        return category;
+    }
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }

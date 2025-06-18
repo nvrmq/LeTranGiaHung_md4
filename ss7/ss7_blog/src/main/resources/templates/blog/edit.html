@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -15,9 +15,14 @@
     <div>
         <label>Content:</label>
         <textarea th:field="*{content}" rows="6" required></textarea>
+    </div><div>
+        <label>Category:</label>
+        <select th:field="*{category}" required>
+            <option th:each="cat:${categories}" th:value="${cat}" th:text="${cat.getName()}"></option>
+        </select>
     </div>
-    <button type="submit">Cập nhật</button>
-    <a th:href="@{/blog}">Quay lại</a>
+    <button type="submit">Update</button>
+    <a th:href="@{/blog}">Return to blogs</a>
 </form>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -8,7 +8,8 @@
 <h2 th:text="${blog.title}">Title:</h2>
 <p><strong>Time posted</strong><span th:text="${#temporals.format(blog.createdTime, 'dd/MM/yyyy HH:mm')}"></span></p>
 </br>
+<p th:text="${blog.category}">Category:</p>
 <p th:text="${blog.content}">Content:</p>
-<a th:href="@{/blog}">Return to list</a>
+<a th:href="@{/templates/blog}">Return to list</a>
 </body>
 </html>

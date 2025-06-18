@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2>Blogs list</h2>
+<a th:href="@{/blog/create}">Add new blog</a>
+<a th:href="@{/categories}">List of categories</a>
+<table>
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Category</th>
+        <th>Time created</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="blog : ${blogPages.content != null ? blogPages.content : blogPages}">
+        <td th:text="${blog.title}"></td>
+        <td th:text="${blog.category != null ? blog.category.name : 'No Category'}"></td>
+        <td th:text="${#temporals.format(blog.createdTime, 'dd/MM/yyyy HH:mm')}"></td>
+        <td>
+            <a th:href="@{'/blog/detail/' + ${blog.id}}">Detail</a>
+            <a th:href="@{'/blog/edit/' + ${blog.id}}">Modify</a>
+            <a th:href="@{'/blog/delete/' + ${blog.id}}" onclick="return confirm('Are you sure?')">Delete</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div th:if="${blogPages.hasContent()}">
+    <span th:if="${blogPages.hasPrevious()}">
+        <a th:href="@{/blog(page=${blogPages.number -1})}">Previous</a>
+    </span>
+    <span>Trang <span th:text="${blogPages.number + 1}"></span>/<span th:text="${blogPages.totalPages}"></span></span>
+    <span th:if="${blogPages.hasNext()}">
+        <a th:href="@{/blog(page=${blogPages.number + 1})}">Next</a>
+    </span>
+</div>
+</body>
+</html>
