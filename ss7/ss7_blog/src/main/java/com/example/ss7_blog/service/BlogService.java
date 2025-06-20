@@ -35,4 +35,7 @@ public class BlogService {
     public List<Blog> searchByCategory(Long categoryId){
         return blogRepository.findByCategoryId(categoryId);
     }
+    public List<Blog> searchByTag(String tag){
+        return blogRepository
+    }
 }
