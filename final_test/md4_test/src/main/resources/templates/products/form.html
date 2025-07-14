@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head"></head>
+<body>
+    <nav th:replace="fragments/header :: navbar"></nav>
+    
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 th:text="${title}">Thêm sản phẩm</h3>
+            </div>
+            <div class="card-body">
+                <!-- Thay đổi action tùy thuộc vào thêm mới hoặc sửa -->
+                <form th:action="${isEdit != null && isEdit ? '/edit/' + productForm.id : '/add'}"
+                      th:object="${productForm}" method="post">
+                      
+                    <!-- ID hidden field cho trường hợp sửa -->
+                    <input type="hidden" th:if="${productForm.id != null}" th:field="*{id}">
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" th:field="*{name}"
+                            placeholder="Nhập tên sản phẩm (5-50 ký tự)">
+                        <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Giá bắt đầu <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="price" 
+                               th:attr="data-price=${productForm.price}" 
+                               name="price_display"
+                               placeholder="Nhập giá bắt đầu (tối thiểu 100,000 VND)">
+                        <input type="hidden" th:field="*{price}" id="hiddenPrice">
+                        <div class="text-danger" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Tình trạng <span class="text-danger">*</span></label>
+                        <select class="form-select" id="status" th:field="*{status}">
+                            <option value="chờ duyệt">Chờ duyệt</option>
+                            <option value="đang đấu giá">Đang đấu giá</option>
+                            <option value="đã bán">Đã bán</option>
+                        </select>
+                        <div class="text-danger" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="categoryId" class="form-label">Loại sản phẩm <span class="text-danger">*</span></label>
+                        <select class="form-select" id="categoryId" th:field="*{categoryId}">
+                            <option value="">--Chọn loại sản phẩm--</option>
+                            <option th:each="category : ${categories}" 
+                                    th:value="${category.cid}" 
+                                    th:text="${category.name}"></option>
+                        </select>
+                        <div class="text-danger" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a th:href="@{/products}" class="btn btn-secondary">Hủy</a>
+                        <!-- Đổi text button dựa vào trường hợp thêm mới hoặc sửa -->
+                        <button type="submit" class="btn btn-primary" th:text="${isEdit != null && isEdit ? 'Cập nhật sản phẩm' : 'Lưu sản phẩm'}">Lưu sản phẩm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/footer :: footer"></footer>
+    
+    <script>
+        // Xử lý định dạng số khi người dùng nhập giá
+        document.addEventListener('DOMContentLoaded', function () {
+            const priceInput = document.getElementById('price');
+            const hiddenPriceInput = document.getElementById('hiddenPrice');
+            
+            // Khởi tạo giá trị ban đầu từ data attribute
+            if (priceInput.dataset.price) {
+                const initialPrice = parseFloat(priceInput.dataset.price);
+                priceInput.value = initialPrice.toLocaleString('vi-VN');
+                hiddenPriceInput.value = initialPrice;
+            }
+            
+            // Xử lý khi người dùng nhập liệu
+            priceInput.addEventListener('input', function(e) {
+                // Loại bỏ tất cả các ký tự không phải số
+                let value = this.value.replace(/[^\d]/g, '');
+                
+                // Cập nhật hidden field với giá trị số
+                hiddenPriceInput.value = value ? value : '';
+                
+                // Định dạng số với dấu phân cách hàng nghìn
+                if (value.length > 0) {
+                    value = parseInt(value, 10).toLocaleString('vi-VN');
+                }
+                
+                // Cập nhật giá trị hiển thị
+                this.value = value;
+            });
+        });
+    </script>
+</body>
+</html> 

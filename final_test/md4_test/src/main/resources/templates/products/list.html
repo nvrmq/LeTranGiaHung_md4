@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head"></head>
+<body>
+    <nav th:replace="fragments/header :: navbar"></nav>
+    
+    <div class="container mt-4">
+        <h1 class="mb-4">Quản lý sản phẩm</h1>
+        
+        <!-- Thông báo -->
+        <div th:replace="fragments/header :: messages"></div>
+        
+        <!-- Form tìm kiếm -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Tìm kiếm sản phẩm</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/products}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="nameSearch" class="form-label">Tên sản phẩm</label>
+                        <input type="text" class="form-control" id="nameSearch" name="name"
+                            th:value="${searchDTO != null ? searchDTO.name : ''}" placeholder="Nhập tên sản phẩm">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="priceSearch" class="form-label">Giá bắt đầu</label>
+                        <input type="text" class="form-control" id="priceSearch" name="price_display"
+                            th:attr="data-price=${searchDTO != null ? searchDTO.price : ''}" 
+                            placeholder="Nhập giá bắt đầu">
+                        <input type="hidden" name="price" id="hiddenPriceSearch">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="categorySearch" class="form-label">Loại sản phẩm</label>
+                        <select class="form-select" id="categorySearch" name="categoryId">
+                            <option value="">--Chọn--</option>
+                            <option th:each="category : ${categories}"
+                                    th:value="${category.cid}"
+                                    th:text="${category.name}"
+                                    th:selected="${searchDTO != null && searchDTO.categoryId != null && searchDTO.categoryId == category.cid}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-search"></i> Tìm
+                        </button>
+                        <button type="button" id="clearSearch" class="btn btn-secondary">
+                            <i class="fas fa-eraser"></i> Xóa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Bảng sản phẩm -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Danh sách sản phẩm</h5>
+                <a th:href="@{/products/add}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Thêm Sản Phẩm
+                </a>
+            </div>
+            <div class="card-body">
+                <form id="deleteForm" th:action="@{/products/delete}" method="post">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Chọn</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Giá khởi điểm</th>
+                                    <th>Loại sản phẩm</th>
+                                    <th>Tình trạng</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="product, stat : ${productPage.content}">
+                                    <td th:text="${stat.index + 1 + productPage.number * productPage.size}"></td>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input" name="selectedIds"
+                                        th:value="${product.id}" data-product-name="${product.name}">
+                                    </td>
+                                    <td th:text="${product.name}"></td>
+                                    <td th:text="${#numbers.formatInteger(product.price, 0, 'POINT') + ' VND'}"></td>
+                                    <td th:text="${product.category.name}"></td>
+                                    <td th:text="${product.status}"></td>
+                                    <td>
+                                        <a th:href="@{/edit/{id}(id=${product.id})}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${productPage.empty}">
+                                    <td colspan="7" class="text-center">Không có sản phẩm nào</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Nút xóa nhiều sản phẩm -->
+                    <button type="submit" class="btn btn-danger mt-2" th:if="${!productPage.empty}">
+                        <i class="fas fa-trash-alt"></i> Xóa sản phẩm đã chọn
+                    </button>
+                </form>
+                
+                <!-- Modal xác nhận xóa -->
+                <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteConfirmModalLabel">Xác nhận xóa</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="deleteConfirmContent">
+                                Bạn có muốn xóa tất cả sản phẩm đã chọn?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                <button type="button" class="btn btn-primary" id="confirmDelete">Yes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modal thông báo lỗi -->
+                <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="errorModalLabel">Thông báo</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Vui lòng chọn ít nhất một sản phẩm để xóa!
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Phân trang -->
+                <div class="pagination" th:if="${productPage.totalPages > 0}">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${productPage.number == 0 ? 'disabled' : ''}">
+                                <a class="page-link" 
+                                   th:href="@{/products(
+                                      page=0, 
+                                      size=${productPage.size}, 
+                                      name=${searchDTO != null ? searchDTO.name : ''}, 
+                                      price=${searchDTO != null ? searchDTO.price : ''}, 
+                                      categoryId=${searchDTO != null ? searchDTO.categoryId : ''}
+                                    )}">
+                                    &laquo;
+                                </a>
+                            </li>
+                            <li class="page-item" th:classappend="${productPage.number == 0 ? 'disabled' : ''}">
+                                <a class="page-link" 
+                                   th:href="@{/products(
+                                      page=${productPage.number - 1}, 
+                                      size=${productPage.size}, 
+                                      name=${searchDTO != null ? searchDTO.name : ''}, 
+                                      price=${searchDTO != null ? searchDTO.price : ''}, 
+                                      categoryId=${searchDTO != null ? searchDTO.categoryId : ''}
+                                    )}">
+                                    &lt;
+                                </a>
+                            </li>
+                            <li class="page-item" 
+                                th:each="pageNumber : ${pageNumbers}"
+                                th:classappend="${pageNumber == productPage.number ? 'active' : ''}">
+                                <a class="page-link" 
+                                   th:href="@{/products(
+                                      page=${pageNumber}, 
+                                      size=${productPage.size}, 
+                                      name=${searchDTO != null ? searchDTO.name : ''}, 
+                                      price=${searchDTO != null ? searchDTO.price : ''}, 
+                                      categoryId=${searchDTO != null ? searchDTO.categoryId : ''}
+                                    )}"
+                                   th:text="${pageNumber + 1}">
+                                </a>
+                            </li>
+                            <li class="page-item"
+                             th:classappend="${productPage.number == productPage.totalPages - 1 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   th:href="@{/products(
+                                      page=${productPage.number + 1}, 
+                                      size=${productPage.size}, 
+                                      name=${searchDTO != null ? searchDTO.name : ''}, 
+                                      price=${searchDTO != null ? searchDTO.price : ''}, 
+                                      categoryId=${searchDTO != null ? searchDTO.categoryId : ''}
+                                    )}">
+                                    &gt;
+                                </a>
+                            </li>
+                            <li class="page-item"
+                             th:classappend="${productPage.number == productPage.totalPages - 1 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   th:href="@{/products(
+                                      page=${productPage.totalPages - 1}, 
+                                      size=${productPage.size}, 
+                                      name=${searchDTO != null ? searchDTO.name : ''}, 
+                                      price=${searchDTO != null ? searchDTO.price : ''}, 
+                                      categoryId=${searchDTO != null ? searchDTO.categoryId : ''}
+                                    )}">
+                                    &raquo;
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="fragments/footer :: footer"></footer>
+    
+    <script>
+        // Xử lý định dạng số cho ô tìm kiếm giá
+        document.addEventListener('DOMContentLoaded', function () {
+            const priceInput = document.getElementById('priceSearch');
+            const hiddenPriceInput = document.getElementById('hiddenPriceSearch');
+            
+            // Khởi tạo giá trị ban đầu từ data attribute
+            if (priceInput.dataset.price && priceInput.dataset.price !== '') {
+                const initialPrice = parseFloat(priceInput.dataset.price);
+                priceInput.value = initialPrice.toLocaleString('vi-VN');
+                hiddenPriceInput.value = initialPrice;
+            }
+            
+            // Xử lý khi người dùng nhập liệu
+            priceInput.addEventListener('input', function(e) {
+                // Loại bỏ tất cả các ký tự không phải số
+                let value = this.value.replace(/[^\d]/g, '');
+                
+                // Cập nhật hidden field với giá trị số
+                hiddenPriceInput.value = value ? value : '';
+                
+                // Định dạng số với dấu phân cách hàng nghìn
+                if (value.length > 0) {
+                    value = parseInt(value, 10).toLocaleString('vi-VN');
+                }
+                
+                // Cập nhật giá trị hiển thị
+                this.value = value;
+            });
+            
+            // Cập nhật nút xóa tìm kiếm để reset cả 2 trường giá
+            const clearButton = document.getElementById('clearSearch');
+            if (clearButton) {
+                clearButton.addEventListener('click', function() {
+                    document.getElementById('nameSearch').value = '';
+                    document.getElementById('priceSearch').value = '';
+                    document.getElementById('hiddenPriceSearch').value = '';
+                    document.getElementById('categorySearch').selectedIndex = 0;
+                });
+            }
+            
+            // Xử lý hiển thị tên sản phẩm trong modal xác nhận xóa
+            const deleteForm = document.getElementById('deleteForm');
+            const confirmDeleteBtn = document.getElementById('confirmDelete');
+            const deleteConfirmContent = document.getElementById('deleteConfirmContent');
+            
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    
+                    const checkboxes = document.querySelectorAll('input[name="selectedIds"]:checked');
+                    if (checkboxes.length === 0) {
+                        // Hiển thị modal thông báo lỗi
+                        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                        errorModal.show();
+                    } else {
+                        // Kiểm tra nếu chỉ chọn 1 sản phẩm thì hiển thị tên sản phẩm
+                        if (checkboxes.length === 1) {
+                            // Lấy tên sản phẩm từ dòng có checkbox đã chọn
+                            const selectedRow = checkboxes[0].closest('tr');
+                            const productName = selectedRow.querySelector('td:nth-child(3)').textContent;
+                            deleteConfirmContent.textContent = `Bạn có muốn xóa sản phẩm "${productName}"?`;
+                        } else {
+                            // Hiển thị thông báo chung nếu chọn nhiều sản phẩm
+                            deleteConfirmContent.textContent = `Bạn có muốn xóa tất cả ${checkboxes.length} sản phẩm đã chọn?`;
+                        }
+                        
+                        // Hiển thị modal xác nhận
+                        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                        deleteModal.show();
+                    }
+                });
+            }
+            
+            // Xử lý khi người dùng xác nhận xóa
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', function() {
+                    deleteForm.removeEventListener('submit', function() {});
+                    deleteForm.submit();
+                });
+            }
+        });
+    </script>
+</body>
+</html> 
